@@ -1,4 +1,10 @@
-#Data science - Week 2 (28.9.2023)
+##%######################################################%##
+#                                                          #
+#             Data science - Week 2 (28.9.2023)            #
+#                                                          #
+##%######################################################%##
+
+
 
 #Data visualization and manipulation ----
 #packages
@@ -23,8 +29,10 @@ tail(nobel) #last few lines of the dataset
 summary(nobel)
 
 nobel <- nobel %>% 
-  mutate(pop_clean = gsub(",", "", population_2018)) %>% #replace the commas in the numbers
-  mutate(pop_clean = gsub("[6]","", pop_clean, fixed=T)) %>%  #'fixed = T' gives an exact match; delete the "[6]'
+  mutate(pop_clean = gsub(",", "", population_2018)) %>% #replace the commas in 
+  #the numbers
+  mutate(pop_clean = gsub("[6]","", pop_clean, fixed=T)) %>%  #'fixed = T' gives 
+  #an exact match; delete the "[6]'
   mutate(pop_clean = as.numeric(pop_clean)) %>% #changed from character to numeric
   mutate(per_capita = nobel_prizes/pop_clean * 1000000) %>% 
   mutate(continent = case_when(
@@ -32,7 +40,8 @@ nobel <- nobel %>%
     continent == "Middle East" ~ "Asia",
     continent == "Australasia" ~ "Oceania", 
     TRUE ~ continent
-  )) #this moves some of the countries into another continent (i.e. bc we had some grouped into Australasia, Middle East, ... that are not really continents)
+  )) #this moves some of the countries into another continent (i.e. bc we had 
+  #some grouped into Australasia, Middle East, ... that are not really continents)
 
 nobel %>% filter(continent == "Africa") #filter only data for Africa
 
@@ -52,10 +61,13 @@ p <- ggplot(nobel, aes(x=continent, y = log(per_capita), fill = continent)) +
   annotate("text", x = 3, y = log(26), parse = TRUE,
            label = expression("WINNERS" ~ "!!"), color = "red") +
   annotate("text", x = 1, y = log(1), parse = TRUE,
-           label = "LOSERS", color = "red")
-grid.raster(elmo, just = "top", gp = gpar(alpha = 0.5)) #this adds the elmo on top of the image
+           label = "LOSERS", color = "red") +
+  theme.ggplots()
+grid.raster(elmo, just = "top", gp = gpar(alpha = 0.5)) #this adds the elmo on top 
+#of the image
 
-ggsave("plot2 - Helen.png", p, units = "cm", width = 20, height = 15) #saves the plot at set dimensions to your WD
+ggsave("plot2 - Helen.png", p, units = "cm", width = 20, height = 15) #saves the 
+#plot at set dimensions to your WD
 
 
 #Functions----
@@ -71,6 +83,18 @@ nobel_per_million(x = nobel$nobel_prizes)
 nobel_per_capita <- function(x, y) {
   x/y}
 nobel_per_capita(x = nobel$nobel_prizes, y = nobel$pop_clean)
+
+#testing out a function (this example is from coding club)
+#you can just do +theme.plots() on your ggplot function and it will do this
+#how cool
+theme.ggplots <- function(){
+  theme_classic()+
+    theme(plot.margin = unit(c(0.5, 0.5, 0.5, 0.5), units = , "cm"),
+          plot.title = element_text(size=20, vjust=1, hjust=0.5),
+          legend.text = element_text(size=12, face="italic"),          
+          legend.title = element_blank(),                              
+          legend.position=c(0.9, 0.9))
+}
 
 #For loops
 for(i in list){
