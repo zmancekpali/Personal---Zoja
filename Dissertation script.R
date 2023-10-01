@@ -117,6 +117,7 @@ model_chl_1 <- lmer(avg_chl ~ type + (1 | code) + (1 | age) +  (1 | ever_dec) + 
 summary(glm(lma ~ type, data = subset_trees))
 
 
+#if i type here now, will it appear???
 
 
 
