@@ -1,7 +1,8 @@
-#Dissertation script - all code
-#Zoja Manček Páli
-#Started on September 30th, 2023
-
+##%######################################################%##
+#                                                          #
+#         Dissertation script - Zoja Manček Páli           #
+#                  Started: 30.9.2023                      #
+##%######################################################%##
 
 #packages
 library(dplyr)
