@@ -12,6 +12,8 @@ library(MASS)
 library(ggfortify)
 library(vegan)
 library(multcomp)
+library(dunn.test)
+library(vegan)
 
 #data
 trees <- read_excel("trees_final.xlsx", sheet = "analysis - final")
@@ -19,6 +21,7 @@ subset_trees <- trees[trees$type %in% c('Native', 'Invasive', 'Naturalised'), ] 
 subset_trees$type <- factor(subset_trees$type , levels=c("Native", "Naturalised", "Invasive")) #rearranging the rows in the dataset to this particular order
 subset_trees <- subset_trees %>% mutate(canopy_pos = recode(canopy_pos, "L" = "Lower",
                                                        "U" = "Upper"))
+flipped_trees <- t(subset_trees)
 
 #initial visualisations
 hist(subset_trees$lma)
@@ -64,7 +67,7 @@ ggsave("DISS-lma_boxplot.jpg", lma_boxplot,
        units = "cm", width = 20, height = 15) 
 
 
-tukey_result <- TukeyHSD(lma_KW)
+dunn_LMA <- dunn.test(subset_trees$LMA, subset_trees$type, method = "bonferroni")
 
 #chlorophyll models and boxplot ----
 chl_mod1 <- lm(avg_chl ~ type, data = subset_trees)
@@ -222,7 +225,43 @@ anova(lm(Dark_resp ~ ever_dec, data = subset_trees))
 
 
 
-#post-hoc Tukay tests
+#PCA ----
+morphological_data <- subset_trees %>%
+  dplyr::select(type, LMA, LDCM)
+
+physiological_data <- subset_trees %>%
+  dplyr::select(type, A, E, GH20, Dark_resp)
+
+chemical_data <- subset_trees %>%
+  dplyr::select(type, avg_chl)
+
+pca_result_morphological <- morphological_data %>%
+  filter(!is.na(LMA) & !is.na(LDCM)) %>%
+  group_by(type) %>%
+  summarise_all(scale) %>%
+  ungroup() %>%
+  dplyr::select(-type) %>%
+  prcomp()
+plot(pca_result_morphological)
+biplot(pca_result_morphological)
+
+
+pca_result_physiological <- physiological_data %>%
+  filter(!is.na(A) & !is.na(E) & !is.na(Dark_resp) & !is.na(GH20)) %>%
+  group_by(type) %>%
+  summarise_all(scale) %>%
+  ungroup() %>%
+  dplyr::select(-type) %>%
+  prcomp()
+plot(pca_result_physiological)
+biplot(pca_result_physiological)
+
+#NMDS ----
+invasive_lma <- subset_trees$`LMA`[subset_trees$type == "Invasive"]
+native_lma <- subset_trees$`LMA`[subset_trees$type == "Native"]
+naturalized_lma <- subset_trees$`LMA`[subset_trees$type == "Naturalised"]
+lma_matrix <- data.frame(Invasive = invasive_lma, Native = native_lma, Naturalised = naturalized_lma)
+
 
 
 #mixed effect models?? ----
