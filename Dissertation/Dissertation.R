@@ -7,7 +7,7 @@
 
 #WD
 setwd("~/") #erases previously set WDs
-setwd("Personal---Zoja/Dissertation") #sets a new one
+setwd("Personal - All/Dissertation") #sets a new one
 getwd() #check that it's worked
 
 
