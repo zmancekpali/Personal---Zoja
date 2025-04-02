@@ -1,3 +1,5 @@
-# Personal---Zoja
+# Personal Repo - Zoja
 
-My personal repo - all of the code so far
+My personal repo - includes all the code to my undergraduate dissertation and additional files which contain past coding files from my undergraduate dissertation. 
+
+
