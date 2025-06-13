@@ -6,8 +6,8 @@
 
 #WD
 setwd("~/") #erases previously set WDs
-setwd("Personal repo - zmancekpali/Coding Club/Week 4 - Data Wrangling") #sets a new one
-getwd() #check that it's worked
+setwd("~/Desktop/Zoja Complete Repository/Data Science for EES Course/Coding Club/Week 4 - Data Wrangling")
+getwd()  # Check it workedgetwd() #check that it's worked
 
 #Libraries
 library(dplyr)
@@ -214,7 +214,7 @@ trees.five <- trees.genus %>%
           axis.text = element_text(size = 12),
           legend.text = element_text(size = 12)))
 
-tree.plots <-  
+(tree.plots <-  
   trees.five  %>%      # the data frame
   group_by(Genus) %>%  # grouping by genus
   do(plots =           # the plotting call within the do function
@@ -226,7 +226,7 @@ tree.plots <-
              axis.text = element_text(size = 14),
              legend.text = element_text(size = 12),
              plot.title = element_text(hjust = 0.5),
-             legend.position = "bottom"))
+             legend.position = "bottom")))
 
 # You can view the graphs before saving them
 tree.plots$plots
@@ -275,3 +275,4 @@ ggplot(acer.percent) +
   geom_col(aes(x = Quadrant, y = percent)) +
   labs(x = 'Quadrant', y = 'Proportion of Acer') +
   theme_bw()
+

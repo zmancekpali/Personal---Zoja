@@ -6,7 +6,7 @@
 
 #WD
 setwd("~/") #erases previously set WDs
-setwd("Personal repo - zmancekpali/Coding Club/Week 5 - Data Visualisation") #sets a new one
+setwd("~/Desktop/Zoja Complete Repository/Data Science for EES Course/Coding Club/Week 5 - Data visualisation")
 getwd() #check that it's worked
 
 #Libraries
@@ -17,6 +17,7 @@ library(ggplot2)
 library(ggrepel)
 library(gridExtra)
 library(readr)
+library(stringr)
 library(tidyr)
 library(viridis)
 
@@ -549,7 +550,7 @@ d1 <- rbind(c(0, 0), d1)
                    breaks = seq(0, 100, by = 3),
                    fill = "palegreen4") +
     theme_niwot() +
-    scale_y_continuous(limits = c(0, 100), expand = expand_scale(mult = c(0, 0.1))) + #adds the outline
+    scale_y_continuous(limits = c(0, 100), expand = expansion(mult = c(0, 0.1))) + #adds the outline
     geom_step(data = d1, aes(x = x, y = y),
               stat = "identity", colour = "palegreen4"))
 

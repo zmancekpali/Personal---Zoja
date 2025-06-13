@@ -9,12 +9,11 @@
 
 #WD
 setwd("~/") #erases previously set WDs
-setwd("Personal repo - zmancekpali/Coding Club/Week 9 - Data synthesis") #sets a new one
+setwd("~/Desktop/Zoja Complete Repository/Data Science for EES Course/Coding Club/Week 9 - Data synthesis")
 getwd() #check that it's worked
 
 
 #Libraries
-devtools::install_github("wilkox/treemapify")
 library(broom) 
 library(ggalt)
 library(ggrepel)  
@@ -137,7 +136,7 @@ diet_means <- bird_models_traits %>% group_by(diet) %>%
                        labels = c("-0.2", "-0.1", "0", "0.1", "0.2")) +
     scale_x_discrete(labels = c("Carnivore", "Fruigivore", "Omnivore", "Insectivore", "Herbivore")) +
     labs(x = NULL, y = "\nPopulation trend") +
-    guides(colour = FALSE, fill = FALSE))
+    guides(colour = "none", fill = "none"))
 
 ggsave("trends_diet.png", trends_diet, path = "Plots", height = 5, width = 8)
 
@@ -243,3 +242,4 @@ head(bird_models_mass)
     labs(x = "\nlog(mass)", y = "Absolute population change\n"))
 
 ggsave("trends_mass.png", trends_mass, path = "Plots", height = 5, width = 6)
+

@@ -7,7 +7,7 @@
 
 #WD
 setwd("~/") #erases previously set WDs
-setwd("Personal repo - zmancekpali/Dissertation") #sets a new one
+setwd("~/Desktop/Zoja Complete Repository/Dissertation") #sets a new one
 getwd() #check that it's worked
 
 
@@ -30,10 +30,10 @@ library(vegan)
 #Data
 trees <- read.csv("traits_analysis2.csv")
 trees <- trees %>% 
-  mutate(canopy_pos = recode(canopy_pos, 
+  dplyr::mutate(canopy_pos = dplyr::recode(canopy_pos, 
                              "L" = "Lower",
                              "U" = "Upper")) %>%  #recode canopy positions from abbreviations
-  mutate(code_two = recode(code_two,
+  dplyr::mutate(code_two = dplyr::recode(code_two,
                            "CB" = "C. bullatus",
                            "RPS" = "R. pseudoacacia semperflorens")) %>% #recode alien species names
   filter(A >= 0) %>% 
@@ -50,7 +50,7 @@ trees$age <- as.numeric(trees$age)
 
 nns <- trees %>% 
   filter(type %in% c('Native', 'Naturalised', "Invasive")) %>% #excluding the alien group for initial analysis
-  mutate(canopy_pos = recode(canopy_pos, 
+  mutate(canopy_pos = dplyr::recode(canopy_pos, 
                              "L" = "Lower",
                              "U" = "Upper")) %>%  #recode canopy positions from abbreviations
   arrange(type = factor(type, levels = c('Native', 'Naturalised', 'Invasive'))) %>%  #rearranges the categories in this order
@@ -66,10 +66,10 @@ traits.palette2 <- c("#CD6090", "#698B69", "#EEC900", "#5EA8D9", "#245C82", "#4A
 
 cn_trees <- read.csv("cn_analysis.csv")
 cn_trees <- cn_trees %>% 
-  mutate(canopy_pos = recode(canopy_pos, 
+  mutate(canopy_pos = dplyr::recode(canopy_pos, 
                              "L" = "Lower",
                              "U" = "Upper")) %>%  #recode canopy positions from abbreviations
-  mutate(code_two = recode(code_two,
+  mutate(code_two = dplyr::recode(code_two,
                            "CB" = "C. bullatus",
                            "RPS" = "R. pseudoacacia semperflorens")) %>% #recode alien species names
   arrange(code_two = factor(type, levels = c('Native', 'Naturalised', 'Invasive', 
@@ -81,7 +81,7 @@ cn_trees$age <- as.numeric(cn_trees$age)
 
 cn_nns <- cn_trees %>% 
   filter(type %in% c('Native', 'Naturalised', "Invasive")) %>% #excluding the alien group for initial analysis
-  mutate(canopy_pos = recode(canopy_pos, 
+  mutate(canopy_pos = dplyr::recode(canopy_pos, 
                              "L" = "Lower",
                              "U" = "Upper")) %>%  #recode canopy positions from abbreviations
   arrange(type = factor(type, levels = c('Native', 'Naturalised', 'Invasive'))) %>%   #rearranges the categories in this order
@@ -717,13 +717,13 @@ AIC(null_cn, model_cn_1, model_cn_2, model_cn_3)
 
 
 #NMDS----
-physiological <- nns %>% select(A, E, g)
-morphological <- nns %>% select(lma, ldcm)
-chemical <- cn_nns %>% select(c_n)
+physiological <- nns %>% dplyr::select(A, E, g)
+morphological <- nns %>% dplyr::select(lma, ldcm)
+chemical <- cn_nns %>% dplyr::select(c_n)
 #Morphological NMDS (nns) ----
 numeric_cols_morph <- colnames(morphological)[sapply(morphological, is.numeric)] 
 numeric_data_morph <- morphological[, numeric_cols_morph]
-numeric_data_morph <- numeric_data_morph %>% select(lma, ldcm)
+numeric_data_morph <- numeric_data_morph %>% dplyr::select(lma, ldcm)
 
 nmds_morph <- metaMDS(morphological, distance = "euclidean")
 nmds_coords_morph <- as.data.frame(scores(nmds_morph, "sites"))
@@ -755,7 +755,7 @@ anosim(diss_matrix_morph, nns$type, permutations = 9999)
 #Physiological NMDS (nns) ----
 numeric_cols_phys <- colnames(physiological)[sapply(physiological, is.numeric)] 
 numeric_data_phys <- physiological[, numeric_cols_phys]
-numeric_data_phys <- numeric_data_phys %>% select(A, E, g)
+numeric_data_phys <- numeric_data_phys %>% dplyr::select(A, E, g)
 
 nmds_phys <- metaMDS(physiological, distance = "euclidean")
 nmds_coords_phys <- as.data.frame(scores(nmds_phys, "sites"))
@@ -788,7 +788,7 @@ anosim(diss_matrix_phys, nns$type, permutations = 9999)
 #Chemical NMDS (nns) ----
 numeric_cols_chem <- colnames(chemical)[sapply(chemical, is.numeric)] 
 numeric_data_chem <- chemical[, numeric_cols_chem]
-numeric_data_chem <- numeric_data_chem %>% select(c_n)
+numeric_data_chem <- numeric_data_chem %>% dplyr::select(c_n)
 
 nmds_chem <- metaMDS(chemical, distance = "euclidean")
 nmds_coords_chem <- as.data.frame(scores(nmds_chem, "sites"))
@@ -817,81 +817,6 @@ anosim(diss_matrix_chem, cn_nns$type, permutations = 9999)
 #significant, the three types are significantly different in their chemical traits (p = 8e-04);
 #however, the R is close to 0 (0.117), so this relationship is not very strong but still significant
 
-
-
-
-
-
-
-#PCA in progress (badly and sadly) ---- 
-phys_subset <- nns %>% select(A, E, g, type)
-morph_subset <- nns %>% select(lma, ldcm, type)
-chem_subset <- cn_nns %>% select(c_n, type)
-morphological_subset <- morph_subset[1:nrow(chemical), ]
-physiological_subset <- phys_subset[1:nrow(chemical), ] #subsetting the physiological and morphological
-#data to match the number of columns in chemical (because there were 2 samples each in chemical, as opposed to 3 for the other two)
-#this is done randomly, just as the chemical traits samples were
-
-combined_tree_data <- cbind(physiological_subset, morphological_subset)
-combined_tree_data$type <- as.factor(combined_tree_data$type)
-combined_tree_data_no_type <- combined_tree_data[, !names(combined_tree_data) %in% c("type")] #removes type as a variable; unnecesary for the PCA
-scaled_data <- scale(combined_tree_data) #scaling; important for a PCA
-(pca_result <- prcomp(scaled_data, scale. = TRUE))
-
-#plotting the PCA
-pc_scores <- as.data.frame(pca_result$x)
-rotation_matrix <- as.data.frame(pca_result$rotation) #extract rotation matrix (loadings)
-biplot(pca_result, scale = 0, cex = 0.7)
-#Direction of Arrows: The direction of the arrows represents the relationship between the original variables and the principal components. Arrows that point in similar directions indicate positive correlations between the variables and the principal components, while arrows pointing in opposite directions indicate negative correlations.
-#Length of Arrows: The length of the arrows represents the importance or weight of each variable in defining the principal components. Longer arrows indicate variables that have a greater influence on the principal components.
-#Angle between Arrows: The angle between arrows indicates the correlation (or lack thereof) between the corresponding variables. Arrows that are perpendicular (at a right angle) to each other are uncorrelated with each other. In your case, if the arrows for variables A and E are at a right angle, it suggests that these variables are uncorrelated in the dataset.
-#Observation Points: The points in the biplot represent individual observations (samples). Observations that are closer to each other in the biplot space are more similar in terms of their variable values. Observations that are further apart are more dissimilar.
-
-#so i can see that g and E are negatively correlated; as are A and lma (and c_n and lma)
-#A and E (and c_n and E) are not correlated (right angle); neither are A and lma; lma and g; and g and A (and g and c_n)
-#45 degree angle = uncorrelated also
-
-type_colors <- c("Native" = "#698B69", "Naturalised" = "#EEC900", "Invasive" = "#CD6090")
-pca_df <- data.frame(pc_scores[, 1:2], type = combined_tree_data$type)
-
-# Plot the PCA biplot with colored observations using ggplot2
-ggplot(pca_df, aes(PC1, PC2, color = type)) +
-  geom_point(size = 3) +
-  scale_color_manual(values = type_colors, breaks = levels(combined_tree_data$type)) +
-  theme_minimal() +
-  labs(x = "PC1", y = "PC2", color = "Type")
-
-
-
-
-#lucy
-pca_data <- nns %>% 
-  select(lma, ldcm, A, E, g, chl)
-
-pca <- princomp(pca_data, cor = TRUE, scores = TRUE)
-pca$loadings #pca1 explains loads -> add the scree plot and see that the comp 1 explains a lot (plot(pca))
-#lma and chl are the most important variables in the pca1; followed by g, E, and A (but the latter in the opp direction)
-#add the pca1 and pca2 to the original dataset to plot 
-#can go back to the models and use the pca as a response variable
-#then decide how to name the groups (i.e. pca1 = morphological and chemical; pca2 = morphological and physiological)
-
-biplot <- biplot(pca)
-
-#workflow
-#dimension reduction (pca) -> modelling -> post-hoc tests
-#double check that the traits are normally distributed for the PCA (if not, then transform)
-hist(nns$lma)
-shapiro.test(nns$lma) #non-normal
-hist(nns$ldcm)
-shapiro.test(nns$ldcm) #normal
-hist(nns$A)
-shapiro.test(nns$A) #non-normal
-hist(nns$E)
-shapiro.test(nns$E) #normal
-hist(nns$g)
-shapiro.test(nns$g) #non-normal
-hist(nns$chl)
-shapiro.test(nns$chl) #non-normal
 
 
 

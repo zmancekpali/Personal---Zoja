@@ -7,7 +7,7 @@
 
 #WD
 setwd("~/") #erases previously set WDs
-setwd("Challenge 3/Challenge") #sets WD to this folder
+setwd("~/Desktop/Zoja Complete Repository/Data Science for EES Course/Data Science Challenges/Challenge 3/Challenge") #sets WD to this folder
 getwd() #check that it's worked
 
 #Libraries
@@ -23,6 +23,7 @@ library(mgcv)
 library(sjPlot)
 library(tidyverse)
 library(tidybayes)
+library(yarrr)
 
 #Data
 load("LPI_data.Rdata")
@@ -40,10 +41,10 @@ orca <- data %>%
                       "Number of sightings","Estimated density"),
          !is.na(Abundance),
          Location.of.population != "Inside Passage, between the British Columbia-Washington and the British Columbia-Alaska borders") %>% 
-  mutate(Year = as.numeric(sub("^X", "", Year)),
+  dplyr::mutate(Year = as.numeric(sub("^X", "", Year)),
          Abundance = as.numeric(ifelse(Abundance == "NULL", NA, Abundance))) %>% 
-  select(id, Location.of.population, Country.list, Units, Year, Abundance) %>% 
-  mutate(Location.of.population = recode(Location.of.population, 
+  dplyr::select(id, Location.of.population, Country.list, Units, Year, Abundance) %>% 
+  dplyr::mutate(Location.of.population = dplyr::recode(Location.of.population, 
          "Northern residents, British Columbia" = "N. residents, BC",
          "Southern residents, British Columbia" = "S. residents, BC", 
          "Prince William Sound, Alaska, AT1 population" = "AT1, Alaska",
@@ -57,6 +58,7 @@ orca <- data %>%
   
   
 #Exploring the data ----
+
 #Distribution histogram
 png("Plots/orca_hist.png", width = 800, height = 600) #saves the plot as a png
 orca_seq <- seq(min(orca$Abundance, na.rm = TRUE), max(orca$Abundance, na.rm = TRUE), 
@@ -271,6 +273,8 @@ ggsave("assumptions_checks_sqrt_grid.jpg", assumptions_grid_sqrt, path = "Plots"
        width = 50, height = 20)
 
 
+#----- Issues below -> fix when you come back to it
+
 #While I could not make the model meet the assumptions, I will still discuss the results
 #in the report (especially considering the shapiro test p-value is marginally significant). 
 summary(model3)
@@ -278,11 +282,11 @@ model3_summary <- capture.output(summary(model3))
 writeLines(model3_summary, "Tables/model3_summary.txt")
 
 # Plot the observed vs predicted values
-plot(prediction_data$observed, prediction_data$predicted,
+plot(model3$observed, model3_sum$predicted,
      xlab = "Observed Abundance", ylab = "Predicted Abundance",
      main = "Observed vs Predicted Abundance",
      pch = 16, col = "blue")
-abline(0, 1, col = "red") 
+abline(0, 1, col = model3_summary(0, 1, col = "red")) 
 
 # Scatter plot of fitted vs. observed values
 plot(predictions_data$Observed, predictions_data$Predicted,

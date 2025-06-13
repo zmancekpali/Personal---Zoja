@@ -7,7 +7,7 @@
 
 #WD
 setwd("~/") #erases previously set WDs
-setwd("Personal repo - zmancekpali/Data Science Challenges/Challenge 1") #sets WD to this folder
+setwd("~/Desktop/Zoja Complete Repository/Data Science for EES Course/Data Science Challenges/Challenge 1")
 getwd() #check that it's worked
 
 #Libraries

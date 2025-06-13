@@ -6,7 +6,7 @@
 
 #WD
 setwd("~/") #erases previously set WDs
-setwd("Personal repo - zmancekpali/Other useful content/Collection of things") #sets a new one
+setwd("~/Desktop/Zoja Complete Repository/Useful Code/Collection of useful things") #sets a new one
 getwd() #check that it's worked
 
 #Libraries
@@ -23,7 +23,7 @@ data("ToothGrowth")
 df <- ToothGrowth
 leaf <- read.csv("Data/leaf.csv")
 LMA <- read_excel("Data/LMA.xlsx")
-mesocosm_data <- read.csv("Data/mesocosm_data.csv")
+meso <- read.csv("Data/meso.csv")
 data("mtcars")
 dfm <- mtcars
 nobel <- read.csv("Data/nobel_prize_data.csv")
@@ -54,7 +54,7 @@ nobel %>% filter(continent == "Africa") #filter only data for Africa from the da
 (trees.subset <- LMA %>%  
     filter(TID %in% c('Alder', 'Rowan', 'Birch', "Oak")) %>% #filter by tree species 
     group_by(TID, age, lma_final) %>% 
-    tally() %>% mutate(TID = recode(TID, "Alder" = "A. glutinosa",
+    tally() %>% mutate(TID = dplyr::recode(TID, "Alder" = "A. glutinosa",
                                     "Birch" = "B. pendula",
                                     "Oak" = "Q. robur",
                                     "Rowan" = "S. aucuparia"))) #count how many samples are in each group
@@ -105,14 +105,14 @@ par(opt)
 
 
 #ggplot2 ----
-Water <- subset(mesocosm_data, area == "water")
-Foliage <- subset(mesocosm_data, area == "foliage")
+Water <- subset(meso, area == "water")
+Foliage <- subset(meso, area == "foliage")
 Sediment <- subset(mesocosm_data, area == "sediment")
 Global <- subset(mesocosm_data, area == "Total")
-Area <- as.factor(mesocosm_data$area)
+Area <- as.factor(meso$area)
 
-meso <- mesocosm_data %>% 
-  mutate(area = recode(area, "water" = "Water",
+meso <- meso %>% 
+  mutate(area = dplyr::recode(area, "water" = "Water",
                        "sediment" = "Sediment", 
                        "foliage" = "Foliage", 
                        "Total" = "Global community"))
@@ -162,7 +162,7 @@ my_data <- data.frame (
   group = tid,  
   LMA = c(alder$lma_final, birch$lma_final, oak$lma_final, rowan$lma_final),  
   age = c(alder$age, birch$age, oak$age, rowan$age)
-) %>% mutate(group = recode(group, "Alder" = "A. glutinosa",
+) %>% mutate(group = dplyr::recode(group, "Alder" = "A. glutinosa",
                             "Birch" = "B. pendula",
                             "Oak" = "Q. robur",
                             "Rowan" = "S. aucuparia"))
@@ -338,14 +338,14 @@ grid.arrange(plot_1, plot_2, plot_3, plot_4, plot_5, plot_6, ncol = 3)
 
 #ggmap ----
 leaves <- leaves %>% 
-  select("type", "code", "latin_name", "long", "lat") %>%  #select the relevant columns
-  mutate(type = recode(type, "Alien" = "Alien species",
+  dplyr::select("type", "code", "latin_name", "long", "lat") %>%  #select the relevant columns
+  mutate(type = dplyr::recode(type, "Alien" = "Alien species",
                        "Invasive" = "Invasive species", 
                        "Naturalised" = "Naturalised species", 
                        "Native" = "Native species")) %>%  #recode the invasion type names
   distinct(long, lat, .keep_all = TRUE) #remove multiple rows (avoids overplotting)
 
-ggmap::register_google(key = "AIzaSyDnersipSvcXuK4tCDbr8NOpa-qsrYf9pc", 
+ggmap::register_google(key = "AIzaSyC3Z47DQ4DLoxOhgKM5rTSt33U0DpJvmKo", 
                        write = TRUE) #register your own Google API Key here
 
 (edinburgh <- get_googlemap("edinburgh", zoom = 16))

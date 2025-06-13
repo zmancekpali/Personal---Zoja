@@ -7,7 +7,7 @@
 
 #WD
 setwd("~/") #erases previously set WDs
-setwd("Personal repo - zmancekpali/Data Science Tutorial") #sets a new one
+setwd("~/Desktop/Zoja Complete Repository/Data Science for EES Course/Data Science Tutorial") #sets a new one
 getwd() #check that it's worked
 
 #Libraries
@@ -18,7 +18,7 @@ library(rmarkdown)
 library(tidyverse)
 
 #Set up the google maps connection
-ggmap::register_google(key = "AIzaSyDnersipSvcXuK4tCDbr8NOpa-qsrYf9pc", 
+ggmap::register_google(key = "AIzaSyC3Z47DQ4DLoxOhgKM5rTSt33U0DpJvmKo", 
                        write = TRUE) #register your own Google API Key here
 
 #Data
@@ -32,16 +32,16 @@ str(leaves)
 
 #Data import and wrangling
 leaves <- leaves %>% 
-  select("type", "code", "latin_name", "long", "lat") %>%  #select the relevant columns
-  mutate(type = recode(type, "Alien" = "Alien species",
+  dplyr::select("type", "code", "latin_name", "long", "lat") %>%  #select the relevant columns
+  dplyr::mutate(type = dplyr::recode(type, "Alien" = "Alien species",
                        "Invasive" = "Invasive species", 
                        "Naturalised" = "Naturalised species", 
                        "Native" = "Native species")) %>%  #recode the invasion type names
   distinct(long, lat, .keep_all = TRUE) #remove multiple rows (avoids overplotting)
 
 bugs <- bugs %>% 
-  select("site", "transect", "long", "lat", "quad", "Id") %>%  #select the relevant columns
-  distinct(long, lat, .keep_all = TRUE) #remove multiple rows (avoids overplotting)
+  dplyr::select("site", "transect", "long", "lat", "quad", "Id") %>%  #select the relevant columns
+  dplyr::distinct(long, lat, .keep_all = TRUE) #remove multiple rows (avoids overplotting)
 
 
 #Edinburgh maps ----

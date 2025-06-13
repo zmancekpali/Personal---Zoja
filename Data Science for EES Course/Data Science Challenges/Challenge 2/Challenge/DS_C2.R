@@ -7,7 +7,7 @@
 
 #WD
 setwd("~/")
-setwd("Personal repo - zmancekpali/Data Science Challenges/Challenge 2")
+setwd("~/Desktop/Zoja Complete Repository/Data Science for EES Course/Data Science Challenges/Challenge 2/Challenge")
 getwd()
 
 #Libraries
@@ -18,8 +18,8 @@ library(tidyverse)
 library(tigris)
 
 #Data
-cars <- read.csv("Challenge/Electric_Vehicle_Population_Data.csv")  # Data from https://catalog.data.gov/dataset/electric-vehicle-population-data
-ggmap::register_google(key = "AIzaSyDnersipSvcXuK4tCDbr8NOpa-qsrYf9pc", 
+cars <- read.csv("Electric_Vehicle_Population_Data.csv")  # Data from https://catalog.data.gov/dataset/electric-vehicle-population-data
+ggmap::register_google(key = "AIzaSyC3Z47DQ4DLoxOhgKM5rTSt33U0DpJvmKo", 
                        write = TRUE)  # Register your own Google API Key here
 
 #Inspection
@@ -108,7 +108,7 @@ ggsave("map_1.png", map1, path = "Plots", units = "cm",
        width = 20, height = 17)  # Save plot to Final Plots folder
 
 #Bubble plot
-(bb_plot <- ggplot(filtered_counties, aes(x = Model, y = County, 
+(bb_plot <- ggplot(filtered_wa_counties, aes(x = Model, y = County, 
                                           size = Count, color = Count)) +
     geom_point(alpha = 0.6) +    
     scale_color_gradient(low = "lightpink3", high = "darkred") + # Adjust colors as needed  
@@ -122,38 +122,10 @@ ggsave("map_1.png", map1, path = "Plots", units = "cm",
     theme(axis.line.x = element_line(color="black", linewidth = 0.5),
           axis.line.y = element_line(color="black", linewidth = 0.5)))  # Add axis lines 
 
-ggsave("bubble_plot.png", bb_plot, path = "Challenge/Final Plots", units = "cm", 
-       width = 20, height = 17)   # Save plot to Final Plots folder
-
-#WA Tesla Count by County Map
-(map2 <- ggplot(data = joined2) +
-    geom_sf(aes(fill = Count), color = "white") +
-    scale_fill_distiller(palette = "Reds", direction = 1, 
-                         breaks = c(0, 1000, 5000, 10000, 20000, 35000)) +  # Adjusts the count bar
-    labs(title = "Tesla Count by Washington State County",
-         fill = "Count") +
-    theme_minimal() +
-    theme(panel.grid.major = element_blank()) +
-    theme(axis.text.x = element_blank(),
-          axis.text.y = element_blank(),
-          axis.ticks = element_blank(),
-          plot.background = element_rect(fill = "white"),
-          plot.title = element_text(family = "Georgia",size = 12, face = "bold", 
-                                    vjust = -1),
-          legend.title = element_text(family = "Georgia", size = 8, face = "bold"),
-          legend.position = "right") +
-    guides(fill = guide_legend(keywidth = 6, keyheight = 6) +
-             geom_sf_label(data = merged_data, aes(label = NAME), size = 7)) +
-    ggrepel::geom_label_repel(data = joined, aes(x = Longitude, y = Latitude, 
-                                                 label = paste(County)),
-                              max.overlaps = 100, box.padding = 0.5, 
-                              point.padding = 0.1, segment.color = "black", 
-                              size = 3))  # Adds labels with county names
-
-ggsave("map_2.png", map2, path = "Challenge/Final Plots", units = "cm", 
+ggsave("bubble_plot.png", bb_plot, path = "Plots", units = "cm", 
        width = 20, height = 17)   # Save plot to Final Plots folder
 
 #Arrange the plots
-grid <- grid.arrange(map1, map2, bb_plot, ncol = 3)
-ggsave("grid.png", grid, path = "Challenge/Final Plots", units = "cm",
+grid <- grid.arrange(map1, bb_plot, ncol = 2)
+ggsave("grid.png", grid, path = "Plots", units = "cm",
        width = 50, height = 17)  # Save plot to Final Plots folder
