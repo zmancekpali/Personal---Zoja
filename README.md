@@ -7,8 +7,9 @@ If you are interested in seeing my dissertation work:
 - The code for all of the statistical analysis on my dissertation data can be found [here](https://github.com/zmancekpali/Personal---Zoja/blob/main/Dissertation/Dissertation.R)
 
 Alternatively, if you are interested in my other coding work:
-- The [Data Science Folder](https://github.com/zmancekpali/Personal---Zoja/tree/main/Data%20Science) contains all of my work done during the Data Science for Ecological and Environmental Sciences undergraduate course at the University of Edinburgh, including my own [coding tutotial](https://github.com/zmancekpali/Personal---Zoja/tree/main/Data%20Science/Data%20Science%20Tutorial)
-- You can also see my ever-evolving script of common and useful bits of code I use regularly [here](https://github.com/zmancekpali/Personal---Zoja/blob/main/Other%20useful%20content/Collection%20of%20useful%20things/Collection.R)
+- The [Data Science Folder](https://github.com/zmancekpali/Personal---Zoja/tree/main/Data%20Science%20for%20EES%20Course) contains all of my work done during the Data Science for Ecological and Environmental Sciences undergraduate course at the University of Edinburgh, including my own [coding tutotial](https://github.com/zmancekpali/Personal---Zoja/tree/main/Data%20Science%20for%20EES%20Course/Data%20Science%20Tutorial)
+- Any additional coursework involving coding can be found [here](https://github.com/zmancekpali/Personal---Zoja/tree/main/UoE%20Courses)
+- You can also see my ever-evolving script of common and useful bits of code I use regularly [here](https://github.com/zmancekpali/Personal---Zoja/blob/main/Useful%20Code/Collection%20of%20useful%20things/Collection.R)
 
 ## Coding etiquette for this repository:
 The following rules should be upheld at all times when coding or working in this repo:
@@ -18,4 +19,4 @@ The following rules should be upheld at all times when coding or working in this
 4. All objects are given informative names (object names do not include capital leters and are separated by _ if necessary).
 5. Keep your code to under 100 characters in length per line (comments can extend past that if necessary).
 
-![pic](https://github.com/zmancekpali/Personal---Zoja/blob/main/Other%20useful%20content/Home%20things%20(morale%20boost)/gljun.JPG)
+![pic](https://github.com/zmancekpali/Personal---Zoja/blob/main/Useful%20Code/Home%20things%20(morale%20boost)/gljun.JPG)
