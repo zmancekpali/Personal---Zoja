@@ -663,7 +663,6 @@ if(exists("trees_combined") && nrow(trees_combined) > 0) {
   }
 }
 
-cat("Plots created:", names(plot_list), "\n")
 
 if("CN" %in% colnames(trees_combined)) {
   cn_count <- sum(!is.na(trees_combined$CN))
