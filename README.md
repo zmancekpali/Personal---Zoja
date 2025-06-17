@@ -2,6 +2,8 @@
 
 My personal repo - includes all the code to my undergraduate dissertation and additional files which contain past coding files from my undergraduate studies. 
 
+To see the code for the Wordsmith AI Founder's Associate (Operations) sample code, click [here](https://github.com/zmancekpali/Zoja-Mancek-Pali---Repository/tree/main/Operations%20Analyst%20Code%20-%20Application)
+
 If you are interested in seeing my dissertation work:
 - My full thesis can be found [here](https://github.com/zmancekpali/Personal---Zoja/blob/main/Dissertation/Dissertation.pdf)
 - The code for all of the statistical analysis on my dissertation data can be found [here](https://github.com/zmancekpali/Personal---Zoja/blob/main/Dissertation/Dissertation.R)
