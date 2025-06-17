@@ -1,6 +1,6 @@
 # Operations Analyst R Portfolio
 
-This portfolio demonstrates advanced R analytics capabilities across key operational areas:
+This portfolio demonstrates my R analytics capabilities across the key operational areas:
 
 ## 📊 RevOps & Analytics
 - **01-05**: CRM funnel analysis, conversion tracking, lead source performance
@@ -28,5 +28,7 @@ All visualizations are created using R with ggplot2, demonstrating:
 - Professional visualization design
 - Statistical analysis and business metrics
 - Executive-ready reporting capabilities
+
+The data has been made up for the purposes of visualisation and fulfilling the required tasks. 
 
 *Generated using R - See ops_analyst_r_examples.R for complete code*
