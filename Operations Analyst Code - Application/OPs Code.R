@@ -586,3 +586,146 @@ create_executive_summary <- function() {
 
 # Generate executive summary
 create_executive_summary()
+
+
+# SAVE ALL OUTPUTS FOR THE PORTFOLIO ============================================================================
+
+# Create output directory
+output_dir <- "ops_analyst_portfolio"
+if (!dir.exists(output_dir)) {
+  dir.create(output_dir)
+}
+
+# Function to save plots with high quality
+save_plot <- function(plot_object, filename, width = 12, height = 8) {
+  filepath <- file.path(output_dir, paste0(filename, ".png"))
+  ggsave(filepath, plot_object, width = width, height = height, dpi = 300, bg = "white")
+  cat("Saved:", filepath, "\n")
+}
+
+# Function to save tables as images
+save_table_image <- function(data, filename, title = "") {
+  library(gridExtra)
+  library(grid)
+  
+  # Create a nice table grob
+  table_grob <- tableGrob(data, rows = NULL, theme = ttheme_default(
+    core = list(fg_params = list(cex = 0.8)),
+    colhead = list(fg_params = list(cex = 0.9, fontface = "bold")),
+    rowhead = list(fg_params = list(cex = 0.8))
+  ))
+  
+  # Add title if provided
+  if (title != "") {
+    title_grob <- textGrob(title, gp = gpar(fontsize = 16, fontface = "bold"))
+    combined <- arrangeGrob(title_grob, table_grob, heights = c(0.1, 0.9))
+  } else {
+    combined <- table_grob
+  }
+  
+  filepath <- file.path(output_dir, paste0(filename, ".png"))
+  ggsave(filepath, combined, width = 12, height = 8, dpi = 300, bg = "white")
+  cat("Saved:", filepath, "\n")
+}
+
+# 1. SAVE REVOPS PLOTS
+save_plot(funnel_plot, "01_revops_funnel_chart")
+save_plot(conversion_plot, "02_revops_conversion_rates")
+save_plot(dropoff_plot, "03_revops_dropoff_analysis")
+
+# Save RevOps tables
+save_table_image(funnel_results, "04_revops_funnel_metrics", "CRM Funnel Conversion Analysis")
+save_table_image(source_performance, "05_revops_source_performance", "Lead Source Performance Analysis")
+
+# 2. SAVE FINANCE PLOTS
+save_plot(finance_plot1, "06_finance_performance_trends")
+save_plot(budget_variance_plot, "07_finance_budget_variance")
+save_plot(margin_plot, "08_finance_margin_analysis")
+
+# Save Finance tables
+save_table_image(tail(monthly_pnl[c("month", "revenue", "gross_profit", "ebitda", "gross_margin", "ebitda_margin")], 6), 
+                 "09_finance_pnl_summary", "Monthly P&L Summary (Last 6 Months)")
+save_table_image(budget_variance, "10_finance_budget_variance_table", "Budget vs Actual Variance Analysis")
+
+# 3. SAVE HR PLOTS
+save_plot(hr_plot1, "11_hr_headcount_by_department")
+save_plot(hr_plot2, "12_hr_salary_vs_turnover")
+save_plot(performance_plot, "13_hr_performance_distribution")
+
+# Save HR tables
+save_table_image(hr_summary, "14_hr_department_metrics", "HR Metrics by Department")
+
+# 4. SAVE IT SECURITY PLOTS
+save_plot(security_plot1, "15_security_risk_heatmap")
+save_plot(login_plot, "16_security_login_activity")
+
+# Save Security tables
+save_table_image(head(inactive_users, 10), "17_security_inactive_users", "Inactive Users Report (90+ Days)")
+save_table_image(security_results$summary, "18_security_risk_summary", "Security Risk Assessment Summary")
+
+# 5. SAVE PROCESS IMPROVEMENT PLOTS
+save_plot(process_plot1, "19_process_optimization_matrix")
+save_plot(automation_plot, "20_process_automation_opportunities")
+
+# Save Process tables
+save_table_image(process_optimization[c("process_name", "automation_opportunity", "overall_score", "priority")], 
+                 "21_process_optimization_table", "Process Optimization Opportunities")
+
+# 6. SAVE STRATEGIC ANALYSIS PLOTS
+save_plot(comp_plot, "22_strategic_competitive_positioning")
+save_plot(efficiency_plot, "23_strategic_market_efficiency")
+
+# Save Strategic tables
+save_table_image(competitive_metrics[c("competitor", "market_share", "feature_score", "customer_satisfaction", "competitive_score")], 
+                 "24_strategic_competitive_analysis", "Competitive Analysis Results")
+
+# 7. CREATE EXECUTIVE SUMMARY TABLE
+executive_summary_data <- data.frame(
+  Metric = c("Revenue Growth (MoM)", "EBITDA Margin", "Sales Pipeline Value", 
+             "Active Headcount", "High-Risk Security Issues", "Process Automation Opportunity"),
+  Value = c(paste0(round(tail(monthly_pnl$revenue_growth, 1), 1), "%"),
+            paste0(round(tail(monthly_pnl$ebitda_margin, 1) * 100, 1), "%"),
+            paste0("$", format(sum(crm_data$deal_value, na.rm = TRUE), big.mark = ",")),
+            nrow(filter(employee_data, status == "Active")),
+            nrow(filter(security_results$detailed, risk_score == "High Risk")),
+            paste0(round(sum(process_optimization$automation_opportunity)/1000, 1), "K hours/year")),
+  Status = c("✓ Positive", "✓ Healthy", "📈 Strong", "👥 Stable", "⚠️ Monitor", "🚀 High Impact")
+)
+
+save_table_image(executive_summary_data, "25_executive_summary", "Executive Dashboard Summary")
+
+# CREATE A README FOR THE PORTFOLIO ============================================
+readme_content <- "# Operations Analyst R Portfolio
+
+This portfolio demonstrates advanced R analytics capabilities across key operational areas:
+
+## 📊 RevOps & Analytics
+- **01-05**: CRM funnel analysis, conversion tracking, lead source performance
+
+## 💰 Finance & Reporting  
+- **06-10**: P&L analysis, budget variance tracking, profitability trends
+
+## 👥 HR & People Analytics
+- **11-14**: Headcount analysis, turnover tracking, performance metrics
+
+## 🔒 IT & Security
+- **15-18**: Security risk assessment, user access auditing, login monitoring
+
+## ⚙️ Process Improvement
+- **19-21**: Process optimization analysis, automation opportunity identification
+
+## 🎯 Strategic Analysis
+- **22-24**: Competitive analysis, market positioning, efficiency metrics
+
+## 📋 Executive Summary
+- **25**: Key metrics dashboard for leadership reporting
+
+All visualizations are created using R with ggplot2, demonstrating:
+- Advanced data manipulation with dplyr/tidyr
+- Professional visualization design
+- Statistical analysis and business metrics
+- Executive-ready reporting capabilities
+
+*Generated using R - See ops_analyst_r_examples.R for complete code*"
+
+writeLines(readme_content, file.path(output_dir, "README.md"))
