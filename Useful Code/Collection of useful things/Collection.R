@@ -16,6 +16,7 @@ library(ggspatial)
 library(readxl)
 library(Rmisc)
 library(tidyverse)
+library(tidyquant)
 require(mgcv)
 
 #Data
@@ -28,7 +29,7 @@ data("mtcars")
 dfm <- mtcars
 nobel <- read.csv("Data/nobel_prize_data.csv")
 leaves <- read.csv("Data/traits_analysis.csv")
-
+trees <- read.csv("Data/traits_analysis2.csv")
 
 #Tidyverse basics ----
 dim(nobel) #dimensions of the dataset
@@ -395,3 +396,309 @@ edi_map_satellite <- get_map(rbge, maptype ='satellite', source = "google", zoom
 (rbge_grid <- grid.arrange(rbge_map_with_names, map_with_codes, ncol = 2))
 
 
+
+#finance ----
+aapl_stock_prices <- tq_get("AAPL") #data available online from tidyquant
+head(aapl_stock_prices)
+
+plot(aapl_stock_prices$date, aapl_stock_prices$adjusted, #plots stock prices against date
+     type = "l", #type of graph
+     ylab = "Adjusted Stock Prices", #y axis label
+     xlab = "Year", #x axis label
+     main = "Apple Stock Prices Over Time") #graph title 
+
+#now we can compare Apple stocks to the S&P500
+SP <- tq_get("^GSPC")
+
+par(mar = c(5, 5, 2, 5)) #graphic dimensions
+plot(SP$date, SP$adjusted, type = "l", col = "red",
+     ylab = "S&P500 index",
+     xlab = "Date") #plots the SP index over time
+par(new = T) #new parameter
+plot(aapl_stock_prices$date, aapl_stock_prices$adjusted, 
+     type = "l", axes = F, xlab = NA, ylab = NA, cex = 1.2, #does not change 
+     #axis titles, plots without axes
+     col = "blue") #plot Apple stock price
+axis(side = 4) #adds new axis
+mtext(side = 4, line = 3, "Apple stock price") #new axis text
+legend("topleft",
+       legend=c("S&P500", "Apple"),
+       lty = 1, col = c("red", "blue")) #adds legend
+
+#see price differences from open to close of the stock market
+aapl_diff = aapl_stock_prices$high - aapl_stock_prices$low
+
+plot(aapl_stock_prices$date, aapl_diff, type = "h", xlab = "Date", 
+     ylab = "Difference between high and low prices", col = "blue")
+
+#prices vs returns
+(FANG_daily_all <- FANG |>
+  group_by(symbol) |>
+  ggplot(aes(x = date, y = adjusted, color = symbol)) +
+  geom_line(linewidth = 1) +
+  labs(x = "", y = "Adjusted prices", color = "") +
+  scale_y_continuous(labels = scales::dollar) +
+  theme_tq() + 
+  scale_color_tq())
+
+(FANG_daily <- FANG_daily_all +
+  facet_wrap(~ symbol, ncol = 2, scales = "free_y") +
+  theme(legend.position = "none", legend.title = element_blank())) #separate graphs for each
+
+(FANG_annual_returns <- FANG |>
+  group_by(symbol) |>
+  tq_transmute(select     = adjusted,
+               mutate_fun = periodReturn,
+               period     = "yearly",
+               type       = "arithmetic")) #annual returns for each company
+
+(FANG_annual_returns |>
+    ggplot(aes(x = date-365, y = yearly.returns, fill = symbol)) +
+    geom_col() +
+    geom_hline(yintercept = 0, color = "black") +
+    scale_y_continuous(labels = scales::percent) +
+    labs(y = "Annual returns", x = "") +
+    facet_wrap(~ symbol, ncol = 2, scales = "free_y") +
+    theme_tq() + 
+    scale_fill_tq() +
+    theme(legend.position = "none", legend.title = element_blank()))
+
+#dissertation pipes & loops ----
+trees <- trees %>% 
+  mutate(canopy_pos = recode(canopy_pos, 
+                             "L" = "Lower",
+                             "U" = "Upper")) %>%  #recode canopy positions from abbreviations
+  mutate(code_two = recode(code_two,
+                           "CB" = "C. bullatus",
+                           "R. ponticum" = "Invasive")) %>% #recode alien species names
+  arrange(code_two = factor(type, levels = c('Native', 'Naturalised', 
+                                             'Invasive', 'C. bullatus'))) %>%  #rearranges the categories in this order
+  mutate(latin_name = recode(latin_name,
+                             "Malus pumila" = "Malus x domestica")) %>% #changing the latin name to match Preston et al. (2002)
+  mutate(type = recode(type, RR = "Native", PA = "Naturalised")) %>%  #slight changes to the classifications
+  rename("LMA" = "lma") %>% 
+  rename("LDMC" = "ldcm") %>% 
+  rename("LCC" = "chl") %>% 
+  rename("Rleaf" = "Dark_resp") #tidying
+
+#creating a loop for each variable vs the type of tree (box plots)
+variables <- list(
+  LCC = list(name = "LCC", label = expression("LCC (mg cm"^-2*")")),
+  LMA = list(name = "LMA", label = expression("LMA (g cm"^-2*")")),
+  LDMC = list(name = "LDMC", label = expression("LDMC (mg g"^-1*")")),
+  A = list(name = "A", label = expression("A (μmol m"^-2*" s"^-1*")")),
+  Rleaf = list(name = "Rleaf", label = expression("R"[leaf]*" (μmol m"^-2*" s"^-1*")")),
+  E = list(name = "E", label = expression("E (mmol m"^-2*" s"^-1*")")),
+  g = list(name = "g", label = expression("g (mol m"^-2*" s"^-1*")"))
+)
+
+plot_list <- list()
+
+for(i in 1:length(variables)) {
+  var_name <- variables[[i]]$name
+  var_label <- variables[[i]]$label
+  
+  # Create the plot
+  plot_list[[var_name]] <- ggplot(trees, 
+                                  aes(x = factor(code_two, levels = 
+                                                   c('Native', 'Naturalised', 'Invasive', 
+                                                     'C. bullatus')), 
+                                      y = !!sym(var_name), fill = code_two)) + 
+    geom_boxplot() + 
+    stat_boxplot(geom ='errorbar', width = 0.3) + 
+    scale_fill_manual(values = c("Invasive" = "#CD6090", 
+                                 "Native" = "#698B69",
+                                 "Naturalised" = "#EEC900", 
+                                 "C. bullatus" = "#5EA8D9")) +
+    labs(x = "\n Invasion status", 
+         y = var_label) + 
+    theme_classic() + 
+    theme(axis.text.x = element_text(face = c("plain", "plain", 
+                                              "plain", "italic")), 
+          axis.text = element_text(size = 10), 
+          axis.title = element_text(size = 11), 
+          plot.margin = unit(c(0.5,0.5,0.5,0.5), units = "cm")) +
+    guides(fill = FALSE) +
+    annotate("text", label = paste0(letters[i], ")"), x = 0.7, 
+             y = max(trees[[var_name]], na.rm = TRUE) * 0.95, fontface = "bold")
+}
+
+plot_list$LCC #to view each graph, just do this line for each variable OR:
+do.call(grid.arrange, c(plot_list, ncol = 4))
+
+#to also add the element analysis, merge the datasets
+cn_trees <- read.csv("cn_analysis.csv")
+cn_trees <- cn_trees %>% 
+  dplyr::mutate(canopy_pos = recode(canopy_pos, 
+                                    "M" = "Lower",
+                                    "U" = "Upper"), #recode canopy positions
+                code_two = recode(code_two,
+                                  "CB" = "C. bullatus", 
+                                  "R. ponticum" = "Invasive")) %>% #recode alien species names
+  arrange(code_two = factor(type, levels = c('Native', 'Naturalised', 
+                                             'Invasive', 'C. bullatus'))) %>% #rearranges the categories in this order
+  mutate(c_n = C/N) %>% 
+  rename("CN" = "c_n") %>% 
+  mutate(type = recode(type, RR = "Native", PA = "Naturalised"))  #slight changes to the classifications
+
+
+#merging:
+
+cat("Columns in trees dataset:", colnames(trees), "\n")
+cat("Columns in cn_trees dataset:", colnames(cn_trees), "\n")
+
+common_cols <- intersect(colnames(trees), colnames(cn_trees))
+cat("Common columns:", common_cols, "\n")
+
+merge_cols <- intersect(c("code_two", "type", "canopy_pos", "latin_name"), colnames(cn_trees))
+cn_subset <- cn_trees[, c(merge_cols, "CN")]
+cat("Using these columns for merge:", merge_cols, "\n")
+
+trees_combined <- merge(trees, 
+                        cn_trees[, c("code", "code_two", "canopy_pos", "CN")], 
+                        by = c("code", "code_two", "canopy_pos"), 
+                        all.x = TRUE)
+
+#then loop for plots
+variables <- list(
+  LCC = list(name = "LCC", label = expression("LCC (mg cm"^-2*")")),
+  LMA = list(name = "LMA", label = expression("LMA (g cm"^-2*")")),
+  LDMC = list(name = "LDMC", label = expression("LDMC (mg g"^-1*")")),
+  A = list(name = "A", label = expression("A (μmol m"^-2*" s"^-1*")")),
+  Rleaf = list(name = "Rleaf", label = expression("R"[leaf]*" (μmol m"^-2*" s"^-1*")")),
+  E = list(name = "E", label = expression("E (mmol m"^-2*" s"^-1*")")),
+  g = list(name = "g", label = expression("g (mol m"^-2*" s"^-1*")")),
+  CN = list(name = "CN", label = "C:N ratio")
+)
+plot_list <- list()
+
+# Check if trees_combined exists and has data
+if(exists("trees_combined") && nrow(trees_combined) > 0) {
+  cat("trees_combined has", nrow(trees_combined), "rows\n")
+  cat("Available columns:", colnames(trees_combined), "\n")
+  
+  # Loop through each variable with error handling
+  for(i in 1:length(variables)) {
+    var_name <- variables[[i]]$name
+    var_label <- variables[[i]]$label
+    
+    # Check if the variable exists in the dataset
+    if(var_name %in% colnames(trees_combined)) {
+      
+      # Check if there's actual data for this variable
+      non_na_count <- sum(!is.na(trees_combined[[var_name]]))
+      cat("Variable", var_name, "has", non_na_count, "non-NA values\n")
+      
+      if(non_na_count > 0) {
+        # Create the plot
+        plot_list[[var_name]] <- ggplot(trees_combined, 
+                                        aes(x = factor(code_two, levels = 
+                                                         c('Native', 'Naturalised', 'Invasive', 
+                                                           'C. bullatus')), 
+                                            y = !!sym(var_name), fill = code_two)) + 
+          geom_boxplot() + 
+          stat_boxplot(geom ='errorbar', width = 0.3) + 
+          scale_fill_manual(values = c("Invasive" = "#CD6090", 
+                                       "Native" = "#698B69",
+                                       "Naturalised" = "#EEC900", 
+                                       "C. bullatus" = "#5EA8D9")) +
+          labs(x = "\n Invasion status", 
+               y = var_label) + 
+          theme_classic() + 
+          theme(axis.text.x = element_text(size = 10), 
+                axis.text = element_text(size = 10), 
+                axis.title = element_text(size = 11), 
+                plot.margin = unit(c(0.5,0.5,0.5,0.5), units = "cm")) +
+          # Apply italic formatting to C. bullatus after plot creation
+          guides(fill = FALSE) +
+          annotate("text", label = paste0(letters[i], ")"), x = 0.7, 
+                   y = max(trees_combined[[var_name]], na.rm = TRUE) * 0.95, fontface = "bold")
+        
+        # Apply italic formatting to the last x-axis label (C. bullatus)
+        plot_list[[var_name]] <- plot_list[[var_name]] + 
+          theme(axis.text.x = element_text(size = 10, 
+                                           face = ifelse(1:4 == 4, "italic", "plain")))
+        
+        cat("Successfully created plot for", var_name, "\n")
+      } else {
+        cat("Warning: No data available for", var_name, "\n")
+      }
+    } else {
+      cat("Warning: Variable", var_name, "not found in dataset\n")
+    }
+  }
+} else {
+  cat("Error: trees_combined dataset not found or empty\n")
+  cat("Using original trees dataset instead\n")
+  
+  # Fallback to original trees dataset without CN
+  for(i in 1:(length(variables)-1)) {  # Exclude CN since it's not in original dataset
+    var_name <- variables[[i]]$name
+    var_label <- variables[[i]]$label
+    
+    if(var_name %in% colnames(trees)) {
+      plot_list[[var_name]] <- ggplot(trees, 
+                                      aes(x = factor(code_two, levels = 
+                                                       c('Native', 'Naturalised', 'Invasive', 
+                                                         'C. bullatus')), 
+                                          y = !!sym(var_name), fill = code_two)) + 
+        geom_boxplot() + 
+        stat_boxplot(geom ='errorbar', width = 0.3) + 
+        scale_fill_manual(values = c("Invasive" = "#CD6090", 
+                                     "Native" = "#698B69",
+                                     "Naturalised" = "#EEC900", 
+                                     "C. bullatus" = "#5EA8D9")) +
+        labs(x = "\n Invasion status", 
+             y = var_label) + 
+        theme_classic() + 
+        theme(axis.text.x = element_text(face = c("plain", "plain", 
+                                                  "plain", "italic")), 
+              axis.text = element_text(size = 10), 
+              axis.title = element_text(size = 11), 
+              plot.margin = unit(c(0.5,0.5,0.5,0.5), units = "cm")) +
+        guides(fill = FALSE) +
+        annotate("text", label = paste0(letters[i], ")"), x = 0.7, 
+                 y = max(trees[[var_name]], na.rm = TRUE) * 0.95, fontface = "bold")
+    }
+  }
+}
+
+cat("Plots created:", names(plot_list), "\n")
+
+if("CN" %in% colnames(trees_combined)) {
+  cn_count <- sum(!is.na(trees_combined$CN))
+  cat("CN variable found with", cn_count, "non-NA values\n")
+  
+  if(cn_count > 0) {
+    cat("Creating CN plot...\n")
+    # Create CN plot separately since it wasn't created in the loop
+    plot_list[["CN"]] <- ggplot(trees_combined, 
+                                aes(x = factor(code_two, levels = 
+                                                 c('Native', 'Naturalised', 'Invasive', 
+                                                   'C. bullatus')), 
+                                    y = CN, fill = code_two)) + 
+      geom_boxplot() + 
+      stat_boxplot(geom ='errorbar', width = 0.3) + 
+      scale_fill_manual(values = c("Invasive" = "#CD6090", 
+                                   "Native" = "#698B69",
+                                   "Naturalised" = "#EEC900", 
+                                   "C. bullatus" = "#5EA8D9")) +
+      labs(x = "\n Invasion status", 
+           y = "C:N ratio") + 
+      theme_classic() + 
+      theme(axis.text.x = element_text(size = 10, 
+                                       face = ifelse(1:4 == 4, "italic", "plain")),
+            axis.text = element_text(size = 10), 
+            axis.title = element_text(size = 11), 
+            plot.margin = unit(c(0.5,0.5,0.5,0.5), units = "cm")) +
+      guides(fill = FALSE) +
+      annotate("text", label = "h)", x = 0.7, 
+               y = max(trees_combined$CN, na.rm = TRUE) * 0.95, fontface = "bold")
+    
+    cat("CN plot created successfully\n")
+  }
+} else {
+  cat("CN variable not found in dataset\n")
+}
+
+do.call(grid.arrange, c(plot_list, ncol = 2))
