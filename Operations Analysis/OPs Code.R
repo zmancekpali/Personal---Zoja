@@ -7,7 +7,7 @@
 
 #WD
 setwd("~/") #erases previously set WDs
-setwd("~/Desktop/Zoja Complete Repository/Operations Analyst Code - Application") #sets a new one
+setwd("~/Desktop/Zoja Complete Repository/Operations Analysis") #sets a new one
 getwd()
 
 #Libraries
